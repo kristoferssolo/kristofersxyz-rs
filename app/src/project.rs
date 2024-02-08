@@ -1,4 +1,4 @@
-use std::{fs::read, sync::Arc};
+use std::sync::Arc;
 
 use axum::{
     extract::{Path, State},
@@ -24,7 +24,7 @@ pub async fn add_project(
 ) -> impl IntoResponse {
     let query = sqlx::query!(
         r#"
-        INSERT INTO "project" (title, text, url)
+        INSERT INTO project (title, text, url)
           VALUES ($1, $2, $3) RETURNING title
         "#,
         payload.title,
@@ -55,7 +55,7 @@ pub async fn list_projects(
         Project,
         r#"
         SELECT title, text, url, datetime
-          FROM "project"
+          FROM project
         "#
     )
     .fetch_all(&state.pool)
@@ -74,7 +74,7 @@ pub async fn get_project(
         Project,
         r#"
         SELECT title, text, url, datetime
-          FROM "project"
+          FROM project
           WHERE title = $1
         "#,
         title
@@ -84,5 +84,25 @@ pub async fn get_project(
     match query {
         Ok(project) => Ok((StatusCode::OK, Json(project))),
         Err(e) => Err((StatusCode::NOT_FOUND, e.to_string())),
+    }
+}
+
+pub async fn delete_project(
+    State(state): State<Arc<AppState>>,
+    Path(title): Path<String>,
+) -> Result<impl IntoResponse, impl IntoResponse> {
+    let query = sqlx::query!(
+        r#"
+        DELETE
+          FROM project
+          WHERE title = $1
+        "#,
+        title
+    )
+    .execute(&state.pool)
+    .await;
+    match query {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
+        Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
     }
 }
