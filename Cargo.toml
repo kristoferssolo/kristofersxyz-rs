@@ -1,8 +1,11 @@
-[workspace]
-members = ["app"]
-resolver = "2"
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2021"
 
-[workspace.dependencies]
+
+[dependencies]
+axum = "0.7"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = { version = "1.0", features = ["backtrace"] }
@@ -11,11 +14,11 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tokio = { version = "1.36", features = ["full"] }
 sqlx = { version = "0.7", features = [
-    "runtime-tokio",
-    "macros",
-    "postgres",
-    "migrate",
-    "chrono",
+  "runtime-tokio",
+  "macros",
+  "postgres",
+  "migrate",
+  "chrono",
 ] }
 chrono = { version = "0.4", features = ["serde"] }
 dotenv = "0.15"
