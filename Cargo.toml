@@ -10,3 +10,13 @@ thiserror = "1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tokio = { version = "1.36", features = ["full"] }
+sqlx = { version = "0.7", features = [
+    "runtime-tokio",
+    "macros",
+    "postgres",
+    "migrate",
+    "chrono",
+] }
+chrono = { version = "0.4", features = ["serde"] }
+dotenv = "0.15"
+lazy_static = "1.4"

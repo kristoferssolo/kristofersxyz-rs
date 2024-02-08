@@ -4,7 +4,7 @@ services:
     image: postgres:latest
     container_name: kristofersxyz-rs-db
     environment:
-      POSTGRES_USER: localuser
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: kristofersxyz
     ports:
