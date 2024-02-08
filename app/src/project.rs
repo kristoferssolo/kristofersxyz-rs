@@ -11,10 +11,25 @@ use serde::{Deserialize, Serialize};
 
 use crate::state::AppState;
 
+#[derive(Debug, Clone, Serialize)]
+pub struct Project {
+    title: String,
+    text: String,
+    url: Option<String>,
+    datetime: NaiveDateTime,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateProject {
     title: String,
     text: String,
+    url: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct UpdateProject {
+    title: Option<String>,
+    text: Option<String>,
     url: Option<String>,
 }
 
@@ -38,14 +53,6 @@ pub async fn add_project(
         Ok(project) => Ok((StatusCode::CREATED, project.title.to_string())),
         Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
     }
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct Project {
-    title: String,
-    text: String,
-    url: Option<String>,
-    datetime: NaiveDateTime,
 }
 
 pub async fn list_projects(
@@ -103,6 +110,31 @@ pub async fn delete_project(
     .await;
     match query {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
+        Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
+    }
+}
+
+pub async fn edit_project(
+    State(state): State<Arc<AppState>>,
+    Path(title): Path<String>,
+    Json(project): Json<UpdateProject>,
+) -> Result<impl IntoResponse, impl IntoResponse> {
+    let query = sqlx::query!(
+        r#"
+        UPDATE project
+          SET title = $1, text = $2, url = $3
+          WHERE title = $4
+        "#,
+        project.title,
+        project.text,
+        project.url,
+        title
+    )
+    .execute(&state.pool)
+    .await;
+
+    match query {
+        Ok(_) => Ok(StatusCode::OK),
         Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
     }
 }
