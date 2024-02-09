@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use askama::Template;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -11,12 +12,19 @@ use serde::{Deserialize, Serialize};
 
 use crate::state::AppState;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Template)]
+#[template(path = "project.html")]
 pub struct Project {
     title: String,
     text: String,
     url: Option<String>,
     datetime: NaiveDateTime,
+}
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct Projects {
+    projects: Vec<Project>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -67,8 +75,9 @@ pub async fn list_projects(
     )
     .fetch_all(&state.pool)
     .await;
+
     match query {
-        Ok(projects) => Ok((StatusCode::OK, Json(projects))),
+        Ok(projects) => Ok((StatusCode::OK, Projects { projects })),
         Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
     }
 }
@@ -89,7 +98,7 @@ pub async fn get_project(
     .fetch_one(&state.pool)
     .await;
     match query {
-        Ok(project) => Ok((StatusCode::OK, Json(project))),
+        Ok(project) => Ok((StatusCode::OK, project)),
         Err(e) => Err((StatusCode::NOT_FOUND, e.to_string())),
     }
 }

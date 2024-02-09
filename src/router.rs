@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 
 use crate::{
     project::{add_project, delete_project, edit_project, get_project, list_projects},
@@ -10,8 +13,8 @@ use crate::{
 pub fn init_router(state: Arc<AppState>) -> Router {
     let router = Router::new();
     router
-        .route("/", get(|| async { "Hello there" }))
-        .route("/projects", get(list_projects).post(add_project))
+        .route("/", get(list_projects))
+        .route("/add", post(add_project))
         .route(
             "/projects/:title",
             get(get_project).delete(delete_project).patch(edit_project),
